@@ -60,9 +60,9 @@ You must download the following specific Z-Image models and place them in the co
 
 You need to set your Telegram Bot Token and verify the ComfyUI connection details.
 
-1.  **Bot Token:** Open `Bot.py` and replace the placeholder with your Telegram Bot Token:
+1.  **Bot Token:** Open `constant.py` and replace the placeholder with your Telegram Bot Token:
     ```python
-    # Bot.py
+    # constant.py
     BOT_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN_HERE"
     ```
 
