@@ -29,8 +29,8 @@ class ComfyUIGenerator:
         with open(WORKFLOW_JSON_PATH, 'r', encoding='utf-8') as f:
             workflow = json.load(f)
 
-        # Применяем параметры (зависит от структуры твоего workflow)
-        # Здесь предполагается, что ноды с id '3','32','41','11' существуют как в исходном примере
+        # Apply the generation parameters (adjust based on your workflow's node IDs)
+        # These node IDs ('3', '32', '41', '11') are assumed to exist based on the Z-image workflow structure.
         try:
             workflow.get('3')['inputs']['steps'] = steps
             workflow.get('32')['inputs']['prompt'] = positive_prompt
@@ -40,7 +40,7 @@ class ComfyUIGenerator:
             workflow.get('3')['inputs']['seed'] = actual_seed
             workflow.get('11')['inputs']['shift'] = shift
         except Exception:
-            # Если структура иная — просто попытаемся найти и заменить автоматом
+            # If the structure is different, we skip modification here to prevent crashes.
             pass
 
         return workflow, actual_seed
@@ -86,12 +86,12 @@ class ComfyUIGenerator:
             # status_data expected to be mapping prompt_id -> execution data
             if prompt_id in status_data:
                 execution_data = status_data[prompt_id]
-                # если outputs есть — генерация завершена
+                # The presence of 'outputs' means the generation job is finished.
                 if isinstance(execution_data, dict) and "outputs" in execution_data:
                     end_time = time.time()
                     return status_data, end_time - start_time
 
-                # проверка ошибок
+                # Check the execution status for errors
                 if isinstance(execution_data, dict) and "status" in execution_data and isinstance(execution_data['status'], dict) and "error" in execution_data['status']:
                     raise Exception(f"Generation error: {execution_data['status']['error']}")
 
@@ -139,12 +139,12 @@ class ComfyUIGenerator:
                     if rounded != self.last_percent:
                         self.last_percent = rounded
                         if self.progress_callback:
-                            # поддерживаем sync и async callbacks
+                            # Supports both sync and async callbacks
                             try:
                                 if asyncio.iscoroutinefunction(self.progress_callback):
                                     asyncio.run_coroutine_threadsafe(self.progress_callback(val, mx, percent), self.loop)
                                 else:
-                                    # вызов sync callback (в event loop)
+                                    # Call the sync callback inside the event loop
                                     asyncio.run_coroutine_threadsafe(self._call_sync_callback(val, mx, percent), self.loop)
                             except Exception as e:
                                 pass
@@ -157,11 +157,11 @@ class ComfyUIGenerator:
             pass
 
     async def _call_sync_callback(self, val, mx, percent):
-        # просто обёртка, если пользователь передал синхронную функцию
+        # Simple wrapper to call a synchronous function provided by the user.
         self.progress_callback(val, mx, percent)
 
     def on_error(self, ws, error):
-        # можно логировать
+        # Add logging here if needed
         pass
 
     def on_close(self, ws, code, msg):
@@ -192,11 +192,12 @@ class ComfyUIGenerator:
 
     def generate_image(self, positive_prompt, negative_prompt=DEFAULT_NEGATIVE, seed=DEFAULT_SEED, steps=DEFAULT_STEPS, width=int(DEFAULT_EXTENSION.split('x')[0]), height=int(DEFAULT_EXTENSION.split('x')[1]), cfg=DEFAULT_CFG, sampler_name=DEFAULT_SAMPLER_NAME, scheduler=DEFAULT_SCHEDULER, shift=3.00, progress_callback: Optional[Callable] = None, loop=None):
         """
-        Блокирующий вызов. Запускает WS монитор и ждёт завершения истории по prompt_id.
-        progress_callback может быть coroutine function или sync function: (current, max, percent)
+        A blocking call that handles the full generation process.
+        It starts the WebSocket monitor, submits the prompt, and waits for history completion by prompt_id.
+        The progress_callback can be either a coroutine function or a regular synchronous function: (current_step, max_steps, percentage)
         """
         client_id = self.generate_client_id()
-        # старт WS
+        # Start the WebSocket listener
         self.start_websocket(client_id, progress_callback, loop or asyncio.new_event_loop())
         time.sleep(0.2)
 
