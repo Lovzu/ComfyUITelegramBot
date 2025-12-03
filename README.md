@@ -105,7 +105,7 @@ The initial menu after setting a prompt or using `/start`.
 ### Settings Menu
 Here you can fine-tune all generation parameters.
 * **⛔ Negative:** Set what you *don't* want in the image.
-* **🌱 Seed:** Set a fixed seed for reproducibility (or leave it as `-1` for random).
+* **🌱 Seed:** Set a fixed seed for reproducibility.
 * **📐 Extension:** Choose the image resolution (e.g., `1024x1024`, `1344x768`, etc.).
 * **🔢 Steps / ⚙️ CFG / 🔄 Shift:** Fine-tune the generation parameters based on the specific model requirements.
 * **🎨 Sampler / 📅 Scheduler:** Select the specific generation algorithms (Euler, DPM++, Karras, etc.).
