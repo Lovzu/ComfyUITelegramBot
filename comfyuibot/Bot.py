@@ -21,6 +21,7 @@ logging.basicConfig(
 # Thread pool for blocking operations to prevent blocking the event loop
 executor = ThreadPoolExecutor(max_workers=3)
 
+# Telegram bot configuration
 
 
 class Form(StatesGroup):
@@ -53,25 +54,17 @@ async def update_main_message(chat_id: int, message_id: int, state: FSMContext):
     positive = data_state.get('positive', 'Not set')
     negative = data_state.get('negative', 'Not set')
     seed = data_state.get('seed')
-    steps = data_state.get('steps')
     width, height = data_state.get('extension').split('x')
-    cfg = data_state.get('cfg')
-    shift = data_state.get('shift')
-    sampler_name = data_state.get('sampler_name')
-    scheduler = data_state.get('scheduler')
-
     # Construct the message text with all parameters
     text = "<b>🎨 IMAGE GENERATOR</b>\n\n"
     text += f"✨ <b>Prompt:</b> <code>{positive}</code>\n"
-    text += f"⛔ <b>Negative:</b> <code>{negative}</code>\n\n"
-    text += "<b>Parameters:</b>\n"
-    text += f"🌱 Seed: <code>{seed if seed else 'random'}</code>\n"
-    text += f"🔢 Steps: <code>{steps}</code>\n"
-    text += f"📏 Size: <code>{width}x{height}</code>\n"
-    text += f"⚙️ CFG: <code>{cfg}</code>\n"
-    text += f"🔄 Shift: <code>{shift}</code>\n"
-    text += f"🎨 Sampler: <code>{sampler_name}</code>\n"
-    text += f"📅 Scheduler: <code>{scheduler}</code>"
+    if negative:
+        text += f"⛔ <b>Negative:</b> <code>{negative}</code>\n\n"
+    else:
+        text += f"⛔ <b>Negative:</b> <code>-</code>\n\n"
+    text += "<b>Base Parameters:</b>\n"
+    text += f"🌱 <b>Seed</b>: <code>{seed if seed else 'random'}</code>\n"
+    text += f"📏 <b>Size</b>: <code>{width}x{height}</code>\n"
 
     try:
         await bot.edit_message_text(
@@ -143,7 +136,8 @@ async def process_negative(message: Message, state: FSMContext):
         cfg=data_state.get('cfg'),
         shift=data_state.get('shift'),
         sampler_name=data_state.get('sampler_name'),
-        scheduler=data_state.get('scheduler')
+        scheduler=data_state.get('scheduler'),
+        style=data_state.get('style')
     )
 
     if main_message_id:
@@ -203,7 +197,8 @@ async def process_seed(message: Message, state: FSMContext):
         cfg=data_state.get('cfg'),
         shift=data_state.get('shift'),
         sampler_name=data_state.get('sampler_name'),
-        scheduler=data_state.get('scheduler')
+        scheduler=data_state.get('scheduler'),
+        style=data_state.get('style')
     )
 
     if main_message_id:
@@ -258,6 +253,7 @@ async def process_steps(message: Message, state: FSMContext):
         positive=data_state.get('positive'),
         negative=data_state.get('negative'),
         seed=data_state.get('seed'),
+        style=data_state.get('style'),
         steps=steps,
         extension=data_state.get('extension'),
         cfg=data_state.get('cfg'),
@@ -319,6 +315,7 @@ async def process_cfg(message: Message, state: FSMContext):
         negative=data_state.get('negative'),
         seed=data_state.get('seed'),
         steps=data_state.get('steps'),
+        style=data_state.get('style'),
         extension=data_state.get('extension'),
         cfg=cfg,
         shift=data_state.get('shift'),
@@ -379,6 +376,7 @@ async def process_shift(message: Message, state: FSMContext):
         negative=data_state.get('negative'),
         seed=data_state.get('seed'),
         steps=data_state.get('steps'),
+        style=data_state.get('style'),
         extension=data_state.get('extension'),
         cfg=data_state.get('cfg'),
         shift=shift,
@@ -419,6 +417,7 @@ async def process_positive(message: Message, state: FSMContext):
         negative=data_state.get('negative'),
         seed=data_state.get('seed'),
         steps=data_state.get('steps'),
+        style=data_state.get('style'),
         extension=data_state.get('extension'),
         cfg=data_state.get('cfg'),
         shift=data_state.get('shift'),
@@ -450,6 +449,7 @@ async def process_positive_text(message: Message, state: FSMContext):
     await state.update_data(
         seed=DEFAULT_SEED,
         steps=DEFAULT_STEPS,
+        style=DEFAULT_STYLE,
         extension=DEFAULT_EXTENSION,
         cfg=DEFAULT_CFG,
         shift=DEFAULT_SHIFT,
@@ -486,6 +486,7 @@ async def run_generation(chat_id: int, progress_msg_id: int, state: FSMContext, 
     shift = data.get('shift', DEFAULT_SHIFT)
     sampler_name = data.get('sampler_name', DEFAULT_SAMPLER_NAME)
     scheduler = data.get('scheduler', DEFAULT_SCHEDULER)
+    style = data.get('style', DEFAULT_STYLE)
 
     # Estimate generation time based on steps
     estimated_time = steps * 4.8
@@ -522,6 +523,7 @@ async def run_generation(chat_id: int, progress_msg_id: int, state: FSMContext, 
                 sampler_name,
                 scheduler,
                 shift,
+                style,
                 progress_cb,
                 loop
             )
@@ -538,10 +540,11 @@ async def run_generation(chat_id: int, progress_msg_id: int, state: FSMContext, 
         caption += f"⚙️ CFG: <code>{cfg}</code>\n"
         caption += f"🔄 Shift: <code>{shift}</code>\n"
         caption += f"🎨 Sampler: <code>{sampler_name}</code>\n"
-        caption += f"📅 Scheduler: <code>{scheduler}</code>\n\n"
-        caption += f"✨ <blockquote>{positive}</blockquote>\n"
-        if negative:
-            caption += f"\n⛔ <blockquote>{negative}</blockquote>"
+        caption += f"📅 Scheduler: <code>{scheduler}</code>\n"
+        caption += f"🖼️ Style: <code>{', '.join(style)}</code>\n\n"
+        caption += f"✨ <blockquote>{positive[:MAX_POSITIVE] + '...' if len(positive) > MAX_POSITIVE else positive}</blockquote>\n"
+        if bool(negative):
+            caption += f"\n⛔ <blockquote>{negative[:MAX_NEGATIVE] + '...' if len(negative) > MAX_NEGATIVE else negative}</blockquote>"
 
         # Send the generated image with parameters
         try:
@@ -603,6 +606,7 @@ async def callback(call: CallbackQuery, state: FSMContext):
         state: FSM context for the user
     """
     call_data = call.data
+    print(call_data)
 
     # Handle generation cancellation
     if call_data == 'cancel_generation':
@@ -716,6 +720,17 @@ async def callback(call: CallbackQuery, state: FSMContext):
         await state.set_state(Form.wait_shift)
         await call.answer()
         return
+    if call_data == "style":
+        msg = await call.message.edit_text(
+            '⚠️ <b>Select style, but be careful</b>\n💥 <b>Some styles can <ins>break</ins> your image</b>',
+            reply_markup=UI.style_keyboard(),
+            parse_mode="HTML"
+        )
+        await state.update_data(bot_message_id=msg.message_id)
+        await call.answer()
+        return
+        
+
 
     # Handle image generation
     if call_data == 'generate':
@@ -776,11 +791,12 @@ async def callback(call: CallbackQuery, state: FSMContext):
         negative = data_state.get('negative', DEFAULT_NEGATIVE)
         steps = data_state.get('steps', DEFAULT_STEPS)
         extension = data_state.get('extension', DEFAULT_EXTENSION)
+        width, height = extension.split('x')
         cfg = data_state.get('cfg', DEFAULT_CFG)
         shift = data_state.get('shift', DEFAULT_SHIFT)
         sampler_name = data_state.get('sampler_name', DEFAULT_SAMPLER_NAME)
         scheduler = data_state.get('scheduler', DEFAULT_SCHEDULER)
-
+        style = data_state.get('style', DEFAULT_STYLE)
         await state.clear()
         await state.update_data(
             seed=random.randint(0, 2**32 - 1),  # New random seed
@@ -790,6 +806,7 @@ async def callback(call: CallbackQuery, state: FSMContext):
             shift=shift,
             sampler_name=sampler_name,
             scheduler=scheduler,
+            style=style,
             negative=negative,
             positive=positive
         )
@@ -797,15 +814,17 @@ async def callback(call: CallbackQuery, state: FSMContext):
         width, height = extension.split('x')
         text = "<b>🎨 Change image</b>\n\n"
         text += f"✨ <b>Prompt:</b> <code>{positive}</code>\n"
-        text += f"⛔ <b>Negative:</b> <code>{negative}</code>\n\n"
-        text += "<b>Parameters:</b>\n"
+        if bool(negative):
+            text += f"⛔ <b>Negative:</b> <code>{negative}</code>\n\n"
+        text += "<b>Full Parameters:</b>\n"
         text += f"🌱 Seed: <code>random</code>\n"
         text += f"🔢 Steps: <code>{steps}</code>\n"
         text += f"📐 Size: <code>{width}x{height}</code>\n"
         text += f"⚙️ CFG: <code>{cfg}</code>\n"
         text += f"🔄 Shift: <code>{shift}</code>\n"
         text += f"🎨 Sampler: <code>{sampler_name}</code>\n"
-        text += f"📅 Scheduler: <code>{scheduler}</code>"
+        text += f"📅 Scheduler: <code>{scheduler}</code>\n"
+        text += f"🖼️ Style: <code>{', '.join(style)}</code>"
 
         msg = await call.message.reply(text, reply_markup=UI.main_menu(), parse_mode="HTML")
         await state.update_data(main_message_id=msg.message_id)
@@ -837,8 +856,33 @@ async def callback(call: CallbackQuery, state: FSMContext):
         await state.update_data(scheduler=call_data)
         await call.answer()
 
+    if call_data in STYLES:
+        data_state = await state.get_data()
+        style = data_state.get('style')
+        print(call_data in style)
+        if call_data in style:
+            
+            try:
+                style.remove(call_data)
+                print(style)
+                if bool(style) is False:
+                    style = ['Not set']
+            except:
+                pass
+        else:
+            try:
+                style.append(call_data)
+                style.remove('Not set')
+            except:
+                pass
+        await state.update_data(style=style)
+        await call.answer()
+        
+
+    
+
     # Handle navigation between menus
-    if call_data == 'settings' or call_data == 'back_to_settings' or call_data in SAMPLERS or call_data in EXTENSIONS or call_data in SCHEDULERS:
+    if call_data == 'settings' or call_data == 'back_to_settings' or call_data in SAMPLERS or call_data in EXTENSIONS or call_data in SCHEDULERS or call_data in STYLES:
         data_state = await state.get_data()
         main_message_id = data_state.get('main_message_id', call.message.message_id)
         
@@ -853,30 +897,35 @@ async def callback(call: CallbackQuery, state: FSMContext):
             cfg=data_state.get('cfg'),
             shift=data_state.get('shift'),
             sampler_name=data_state.get('sampler_name'),
-            scheduler=data_state.get('scheduler')
+            scheduler=data_state.get('scheduler'),
+            style=data_state.get('style')
         )
 
         positive = data_state.get('positive', 'Not set')
         negative = data_state.get('negative', 'Not set')
         seed = data_state.get('seed')
         steps = data_state.get('steps')
-        width, height = data_state.get('extension').split('x')
+        width, height = data_state.get('extension').split('x')  
         cfg = data_state.get('cfg')
         shift = data_state.get('shift')
         sampler_name = data_state.get('sampler_name')
         scheduler = data_state.get('scheduler')
+        style = data_state.get('style')
 
         text = "<b>🎨 IMAGE GENERATOR</b>\n\n"
         text += f"✨ <b>Prompt:</b> <code>{positive}</code>\n"
-        text += f"⛔ <b>Negative:</b> <code>{negative}</code>\n\n"
-        text += "<b>Parameters:</b>\n"
+        if bool(negative):
+            text += f"⛔ <b>Negative:</b> <code>{negative}</code>\n\n"
+        text += "<b>Full Parameters:</b>\n"
         text += f"🌱 Seed: <code>{seed if seed else 'random'}</code>\n"
         text += f"🔢 Steps: <code>{steps}</code>\n"
         text += f"📏 Size: <code>{width}x{height}</code>\n"
         text += f"⚙️ CFG: <code>{cfg}</code>\n"
         text += f"🔄 Shift: <code>{shift}</code>\n"
         text += f"🎨 Sampler: <code>{sampler_name}</code>\n"
-        text += f"📅 Scheduler: <code>{scheduler}</code>"
+        text += f"📅 Scheduler: <code>{scheduler}</code>\n"
+        text += f"🖼️ Style: <code>{', '.join(style)}</code>"
+
 
         try:
             await call.message.edit_text(text, reply_markup=UI.settings_menu(), parse_mode="HTML")
@@ -900,7 +949,8 @@ async def callback(call: CallbackQuery, state: FSMContext):
             cfg=data_state.get('cfg'),
             shift=data_state.get('shift'),
             sampler_name=data_state.get('sampler_name'),
-            scheduler=data_state.get('scheduler')
+            scheduler=data_state.get('scheduler'),
+            style=data_state.get('style')
         )
         
         await update_main_message(call.message.chat.id, main_message_id, state)
