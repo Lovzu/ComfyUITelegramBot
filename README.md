@@ -1,4 +1,4 @@
-<img width="1918" height="1030" alt="image" src="https://github.com/user-attachments/assets/40cb7c1e-bb5a-4229-bbda-3664280d47f0" /># 🎨 Z-Image Telegram Bot for ComfyUI
+# 🎨 Z-Image Telegram Bot for ComfyUI
 
 ![Python](https://img.shields.io/badge/Python-3.9%2B-blue?style=for-the-badge&logo=python)
 ![Aiogram](https://img.shields.io/badge/Aiogram-3.x-blueviolet?style=for-the-badge&logo=telegram)
