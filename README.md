@@ -41,14 +41,15 @@ You must download the following specific Z-Image models and place them in the co
 
 ### Step 3: Bot Setup and Dependencies
 
-1.  **Project Structure:** Download all the bot files (`Bot.py`, `UI.py`, `constant.py`, `ComfyAPI.py`, `workflow`) and place them into **one single folder**. All these files must reside together. Style File (`fooocus_styles.json`) place to `ComfyUI\ComfyUI\custom_nodes\ComfyUI-Easy-Use\resources`.
+1.  **Project Structure:** Download all the bot files (`Bot.py`, `UI.py`, `constant.py`, `ComfyAPI.py`, `workflow`) and place them into **one single folder**. All these files must reside together.
+2.  Style File (`fooocus_styles.json`) place to [`ComfyUI\ComfyUI\custom_nodes\ComfyUI-Easy-Use\resources`].
 
-2.  **Install Dependencies:** Open your terminal/command prompt in that folder and run the command to install the required Python libraries:
+3.  **Install Dependencies:** Open your terminal/command prompt in that folder and run the command to install the required Python libraries:
     ```bash
     pip install -r requirements.txt
     ```
 
-3.  **Workflow Setup:** The file `Z-image.json` is the default workflow. Ensure it is in the root directory of the bot project.
+4.  **Workflow Setup:** The file `Z-image.json` is the default workflow. Ensure it is in the root directory of the bot project.
 
     > **ℹ️ Changing Workflow:** If you want to use a different workflow file or change its name, open `constant.py` and modify the `WORKFLOW_JSON_PATH`:
     > ```python
