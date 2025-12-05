@@ -33,10 +33,21 @@ EXTENSIONS = [
     '1344x768',
     '1536x640'
 ]
+
+STYLES = [
+    'Advanced Negative',
+    'Anime',
+    'Realistic',
+    'Simple Negative'
+]
+# Settings
+MAX_POSITIVE = 450
+MAX_NEGATIVE = 300
+
 # Defaults
 COMFYUI_URL = "http://127.0.0.1:8188"
 WS_URL = "ws://127.0.0.1:8188/ws"
-DEFAULT_NEGATIVE = "(asian:1.2), simple background, poorly drawn face, doll, wax figure, (words, letters, symbols:1.25), uncanny valley, extra arms, amputation, extra legs, extra fingers, many fingers, bad anatomy, ugly"
+DEFAULT_NEGATIVE = ""
 WORKFLOW_JSON_PATH = Path(__file__).parent / 'workflow' / 'Z-image.json'  # Can change to custom path
 
 DEFAULT_SEED = 0 
@@ -46,5 +57,4 @@ DEFAULT_CFG = 1.0
 DEFAULT_SAMPLER_NAME = "euler"
 DEFAULT_SCHEDULER = "simple"
 DEFAULT_SHIFT = 3.00
-
-
+DEFAULT_STYLE = ["Simple Negative"]
