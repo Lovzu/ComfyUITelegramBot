@@ -25,6 +25,7 @@ def settings_menu():
         [InlineKeyboardButton(text="📐 Extension", callback_data='extension'), InlineKeyboardButton(text="🔢 Steps", callback_data='steps')],
         [InlineKeyboardButton(text="⚙️ CFG", callback_data='cfg'), InlineKeyboardButton(text="🔄 Shift", callback_data='shift')],
         [InlineKeyboardButton(text="🎨 Sampler", callback_data='sampler_name'), InlineKeyboardButton(text="📅 Scheduler", callback_data='scheduler')],
+        [InlineKeyboardButton(text="🖼️ Style", callback_data='style')],
         [InlineKeyboardButton(text="◀️ Back", callback_data='back_to_main')]
     ]
     return InlineKeyboardMarkup(inline_keyboard=kb)
@@ -39,8 +40,7 @@ def cancel_keyboard():
 
 def extension_keyboard():
     builder = InlineKeyboardBuilder()
-    
-    # Добавляем кнопки
+
     builder.button(text="⬜ 1:1 (1024x1024)", callback_data="1024x1024")     
     builder.button(text="🔲 3:4 (896x1152)", callback_data="896x1152")      
     builder.button(text="📱 5:8 (832x1216)", callback_data="832x1216")       
@@ -52,7 +52,6 @@ def extension_keyboard():
     builder.button(text="📺 21:9 (1536x640)", callback_data="1536x640")   
     builder.button(text="◀️ Back", callback_data='back_to_settings')
     
-    # По 2 кнопки в ряд
     builder.adjust(3)
     
     return builder.as_markup()
@@ -70,23 +69,20 @@ def scheduler_keyboard():
     'kl_optimal': '⚡ KL Optimal'
 }
     for scheduler in SCHEDULERS:
-        # Используем красивое название если есть, иначе форматируем стандартно
         if scheduler in scheduler_names:
             display_name = scheduler_names[scheduler]
         
         builder.button(text=display_name, callback_data=f"{scheduler}")
     
-    # По 1 кнопке в ряд для лучшей читаемости
     builder.adjust(2)
     
-    # Добавляем кнопку "Назад"
     builder.row(InlineKeyboardButton(text="◀️ Back", callback_data='back_to_settings'))
     
     return builder.as_markup()
 def samplers_keyboard():
     builder = InlineKeyboardBuilder()
     
-    # Словарь для красивых названий
+    # Dict for beautifull names
     sampler_names = {
     'euler': '🔹 Euler',
     'euler_ancestral': '🔹 Euler Ancestral',
@@ -146,5 +142,17 @@ def samplers_keyboard():
     
     # Добавляем кнопку "Назад"
     builder.row(InlineKeyboardButton(text="◀️ Back", callback_data='back_to_settings'))
+    
+    return builder.as_markup()
+
+def style_keyboard():
+    builder = InlineKeyboardBuilder()
+
+    builder.button(text="🌸 Anime", callback_data="Anime")     
+    builder.button(text="⚠️ Advanced Negative ", callback_data="Advanced Negative")      
+    builder.button(text="💎 Realistic", callback_data="Realistic")  
+    builder.button(text="🧹 Simple Negative", callback_data="Simple Negative")       
+    builder.button(text="◀️ Back", callback_data='back_to_settings')
+    builder.adjust(2)
     
     return builder.as_markup()
