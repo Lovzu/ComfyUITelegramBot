@@ -1,4 +1,4 @@
-# 🎨 Z-Image Telegram Bot for ComfyUI
+<img width="1918" height="1030" alt="image" src="https://github.com/user-attachments/assets/40cb7c1e-bb5a-4229-bbda-3664280d47f0" /># 🎨 Z-Image Telegram Bot for ComfyUI
 
 ![Python](https://img.shields.io/badge/Python-3.9%2B-blue?style=for-the-badge&logo=python)
 ![Aiogram](https://img.shields.io/badge/Aiogram-3.x-blueviolet?style=for-the-badge&logo=telegram)
@@ -41,7 +41,7 @@ You must download the following specific Z-Image models and place them in the co
 
 ### Step 3: Bot Setup and Dependencies
 
-1.  **Project Structure:** Download all the bot files (`Bot.py`, `UI.py`, `constant.py`, `ComfyAPI.py`, `Z-image.json`) and place them into **one single folder**. All these files must reside together.
+1.  **Project Structure:** Download all the bot files (`Bot.py`, `UI.py`, `constant.py`, `ComfyAPI.py`, `workflow`) and place them into **one single folder**. All these files must reside together. Style File (`fooocus_styles.json`) place to `ComfyUI\ComfyUI\custom_nodes\ComfyUI-Easy-Use\resources`.
 
 2.  **Install Dependencies:** Open your terminal/command prompt in that folder and run the command to install the required Python libraries:
     ```bash
@@ -109,6 +109,7 @@ Here you can fine-tune all generation parameters.
 * **📐 Extension:** Choose the image resolution (e.g., `1024x1024`, `1344x768`, etc.).
 * **🔢 Steps / ⚙️ CFG / 🔄 Shift:** Fine-tune the generation parameters based on the specific model requirements.
 * **🎨 Sampler / 📅 Scheduler:** Select the specific generation algorithms (Euler, DPM++, Karras, etc.).
+* **🖼️ Style:** Select the specific Style for generation (Anime, Realistic, Simple Negative, Advanced Negative).
 
 ---
 
